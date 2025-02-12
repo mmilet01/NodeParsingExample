@@ -3,31 +3,13 @@ import path from "path";
 import { getTextDataInBetweenBrackets, extractUrl } from "./src/utils/utils.js";
 import RequestQueue from "./src/queue/requestQueue.js";
 import { processUrl } from "./src/network/urlService.js";
+import { setupIntegrationTest } from "./src/test/setupIntegrationTest.js";
 
-// for integration test
-import { createRequire } from "module";
-const require = createRequire(import.meta.url);
+setupIntegrationTest();
+main();
 
-if (process.env.USE_NOCK === "true") {
-  const nock = require("nock");
-  nock("http://www.test.com")
-    .persist()
-    .get("/")
-    .reply(
-      200,
-      `<html><head><title>Test Page</title></head><body>Contact: test@example.com</body></html>`
-    );
-  nock("http://www.second.com")
-    .persist()
-    .get("/")
-    .reply(
-      200,
-      `<html><head><title>Second Page</title></head><body>No email here</body></html>`
-    );
-}
-// till here
-
-const requestQueue = new RequestQueue(1000);
+const delay = 1000;
+const requestQueue = new RequestQueue(delay);
 const processedUrls = new Set<string>();
 
 function main() {
@@ -43,13 +25,13 @@ function main() {
     });
 
     stream.on("data", (chunk) => {
-      const textChunk = chunk.toString() + buffer;
+      const textChunk = buffer + chunk.toString();
       buffer = processChunkOfTextData(textChunk);
     });
 
-    stream.on("end", () => {
+    stream.on("end", async () => {
       buffer = processChunkOfTextData(buffer);
-      setTimeout(() => process.exit(0), 2000);
+      await requestQueue.waitForQueueToBeEmpty();
     });
 
     stream.on("error", (err) => {
@@ -76,14 +58,12 @@ function main() {
       }
     });
 
-    process.stdin.on("end", () => {
+    process.stdin.on("end", async () => {
       processChunkOfTextData(buffer);
-      setTimeout(() => process.exit(0), 2000);
+      await requestQueue.waitForQueueToBeEmpty();
     });
   }
 }
-
-main();
 
 function processChunkOfTextData(text: string): string {
   const { results, lastCompleteIndex } = getTextDataInBetweenBrackets(text);
