@@ -26,6 +26,12 @@ class RequestQueue {
 
     this.isProcessing = false;
   }
+
+  public async waitForQueueToBeEmpty(): Promise<void> {
+    while (this.isProcessing || this.queue.length > 0) {
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    }
+  }
 }
 
 export default RequestQueue;
