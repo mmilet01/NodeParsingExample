@@ -6,8 +6,9 @@
   "main": "index.ts",
   "scripts": {
     "build": "tsc",
-    "start": "node dist/index.js",
-    "test": "node --no-warnings --loader=ts-node/esm --experimental-specifier-resolution=node node_modules/mocha/bin/mocha src/test/**/*.test.ts"
+    "start": "node dist/index.js data/testdata.txt",
+    "test": "node --no-warnings --loader=ts-node/esm --experimental-specifier-resolution=node node_modules/mocha/bin/mocha src/test/**/*.test.ts",
+    "server": "node --no-warnings --loader ts-node/esm server.ts"
   },
   "ts-node": {
     "esm": true,
