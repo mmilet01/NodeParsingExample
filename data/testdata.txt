@@ -1,0 +1,25 @@
+Welcome to the URL parsing test file.
+
+Case 1: Single URL
+[ www.somepage.com/page1 ]
+-- Should result in a request to http://www.somepage.com/page1
+
+Case 2: Multiple URLs in one bracket:
+[ Some text and then URL www.somepage.com/somepath and later www.somepage.com/page3 ]
+-- Only "www.somepage.com/page3" is extracted because it’s the last URL in the bracket.
+
+Case 3: Nested brackets:
+[ Outer start: [ www.somepage.com/somepath ] then additional URL www.somepage.com/page5 ]
+-- Should extract "www.somepage.com/page5" from the outer bracket.
+
+Case 4: Repeated URL:
+[ Duplicate URL: www.somepage.com/page1 ]
+-- This should be ignored if www.somepage.com/page1 was already processed in Case 1.
+
+Case 5: Escaped bracket:
+\[ www.somepage.com ]
+-- This is ignored because the bracket is escaped.
+
+Case 6: Inline extra URL:
+Some more text here and a bracket: [ Visit http://www.somepage.com/page6 for more info ]
+-- Should extract "www.somepage.com/page6"
